@@ -18,13 +18,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
- *项目名: tls
  *文件名: RedisTemplateConfig
- *创建者: mt-liuy liuyang@tjmeiteng.com
  *创建时间:2019/4/19 13:31
  *描述: redis客户端的配置
  * 定义了
- * 1.与pre交互的redis客户端
  * 2.系统缓存中的客户端
  */
 @Configuration

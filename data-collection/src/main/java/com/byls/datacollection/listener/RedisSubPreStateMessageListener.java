@@ -6,9 +6,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 项目名: mt-tls
  * 文件名: RedisSubPreStateMessageListener
- * 创建者: mt-liuy liuyang@tjmeiteng.com
  * 创建时间:2019/9/29 10:32
  * 描述: pre链路状态消息订阅通道  链路掉线报警
  */

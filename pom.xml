@@ -10,13 +10,13 @@
     </parent>
 
     <groupId>com.byls</groupId>
-    <artifactId>boat</artifactId>
-    <version>0.0.0</version>
-    <name>boat</name>
+    <artifactId>Byls-boat</artifactId>
+    <version>1.0.0</version>
+    <name>Byls-boat</name>
     <packaging>pom</packaging>
     <description>Demo project for Spring Boot</description>
     <modules>
-        <module>debug</module>
+        <module>boat</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,6 +43,23 @@
                 <artifactId>fastjson</artifactId>
                 <version>1.2.47</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>8.0.15</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>1.1.10</version>
+            </dependency>
+
+            <!-- mybatis-plus-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.1.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
