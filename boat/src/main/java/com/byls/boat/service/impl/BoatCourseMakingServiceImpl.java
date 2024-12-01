@@ -107,13 +107,13 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
     }
 
     @Override
-    public boolean deleteAllCoursePoints() {
+    public void deleteAllCoursePoints() {
         LambdaUpdateWrapper<BoatCourseMaking> updateWrapper = new LambdaUpdateWrapper<>();
 
         updateWrapper.eq(BoatCourseMaking::getDeleteStatus, false);
         updateWrapper.set(BoatCourseMaking::getDeleteStatus, true);
 
-        return this.update(null, updateWrapper);
+        this.update(null, updateWrapper);
     }
 
     /**
@@ -127,14 +127,13 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
     public BoatCourseMaking collectCourseMaking() {
         //  采集航线数据   每点击一次采集    获取缓存中硬件设备传的gps定位   存入一条到航线制作表    将这条数据返回页面
         try {
-            String gpsData = redisUtil.get(RedisKeyConstants.BOAT_COURSE_FLAG);
+            String gpsData = redisUtil.get(RedisKeyConstants.INTEGRATED_NAVIGATION_INFO);
             if (gpsData == null){
                 return null;
             }
             BoatNavigationRecords newRecord = JSON.parseObject(gpsData, BoatNavigationRecords.class);
 
             BoatCourseMaking course = new BoatCourseMaking();
-            course.setRoutePointName(newRecord.getRoutePointName());
             course.setLatitude(newRecord.getLatitude());
             course.setLongitude(newRecord.getLongitude());
             //获取数据库总条数
@@ -210,9 +209,9 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
     //删除已存在的航线
     private void deleteAllRouteByDeviceId(String boatDeviceId) {
         LambdaUpdateWrapper<Route> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Route::getStatus, false);
+        updateWrapper.eq(Route::getStatus, 0);
         updateWrapper.eq(Route::getBoatDeviceId, boatDeviceId);
-        updateWrapper.set(Route::getRouteName, true);
+        updateWrapper.set(Route::getStatus, 1);
         routeService.update(null, updateWrapper);
     }
 

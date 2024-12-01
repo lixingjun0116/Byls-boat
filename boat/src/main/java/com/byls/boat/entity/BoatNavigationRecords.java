@@ -17,13 +17,16 @@ public class BoatNavigationRecords {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
     /**
-     * 航线点名称
+     * 船设备编号
      */
-    @TableField(value = "route_point_name")
-    private String routePointName;
-
+    @TableField(value = "boat_device_id")
+    private String boatDeviceId;
+    /**
+     * 船设备名称
+     */
+    @TableField(value = "device_name")
+    private String deviceName;
     /**
      * 经度
      */
@@ -36,35 +39,19 @@ public class BoatNavigationRecords {
     @TableField(value = "latitude")
     private Double latitude;
 
-    /**
-     * 船体形态，当前状态
-     */
-    @TableField(value = "boat_form")
-    private String boatForm;
-
-    /**
-     * 船设备编号
-     */
-    @TableField(value = "boat_device_id")
-    private String boatDeviceId;
-
-    /**
-     * 生成时间，该位置信息被采集的具体时间。
-     */
-    @TableField(value = "record_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date recordTime;
-
+    // 航向
+    @TableField(value = "heading")
+    private Double heading;
+    // 航向角
+    @TableField(value = "heading_angle")
+    private Double headingAngle;
+    // 航向角速度
+    @TableField(value = "heading_angle_speed")
+    private Double headingAngleSpeed;
     /**
      * 创建时间
      */
     @TableField(value = "created_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createdTime;
-
-    /**
-     * 冗余字段，存储相关的额外信息
-     */
-    @TableField(value = "additional_info")
-    private String additionalInfo;
 }

@@ -62,4 +62,16 @@ public class BoatNavigationRecordsServiceImpl extends ServiceImpl<BoatNavigation
     public List<BoatNavigationRecords> getAllNavigationRecords() {
         return this.list();
     }
+
+    // 条件查询航行记录
+    @Override
+    public BoatNavigationRecords getNavigationRecordsByCondition(BoatNavigationRecords record) {
+        // 条件：设备编号 倒叙最新一条
+        return this.lambdaQuery()
+                .eq(record.getBoatDeviceId() != null, BoatNavigationRecords::getBoatDeviceId, record.getBoatDeviceId())
+                .orderByDesc(BoatNavigationRecords::getCreatedTime)
+                .last("limit 1")
+                .one();
+    }
+
 }

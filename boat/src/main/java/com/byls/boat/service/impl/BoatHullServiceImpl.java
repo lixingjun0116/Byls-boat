@@ -22,7 +22,7 @@ public class BoatHullServiceImpl implements BoatHullService {
     @Override
     public BoatLocationInfoVO getCurrentLocation() {
         try {
-            String gpsData = redisUtil.get(RedisKeyConstants.BOAT_COURSE_FLAG);
+            String gpsData = redisUtil.get(RedisKeyConstants.INTEGRATED_NAVIGATION_INFO);
             if (gpsData == null){
                 return new BoatLocationInfoVO();
             }

@@ -1,9 +1,13 @@
 package com.byls.boat.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.byls.boat.common.ResponseResult;
 import com.byls.boat.config.PersistentHardwareWebSocketClient;
+import com.byls.boat.entity.Waypoint;
 import com.byls.boat.service.BoatHullService;
+import com.byls.boat.service.IWaypointService;
 import com.byls.boat.util.ResponseUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.enums.ReadyState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,13 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/hull/v1")
 public class HullController {
 
     @Autowired
     private BoatHullService boatHullService;
+
+    @Autowired
+    private IWaypointService waypointService;
     private PersistentHardwareWebSocketClient client;
     private boolean isManualMode = true; // 默认手动模式
     private String isRunning = "stop"; // 默认停止状态
@@ -102,5 +115,42 @@ public class HullController {
     @GetMapping("/getBoatLocation")
     public ResponseResult<?> getBoatLocation() {
         return ResponseUtil.successResponse(boatHullService.getCurrentLocation());
+    }
+
+    //通过socket发送航路信息到船控
+    @GetMapping("/sendRouteInfo")
+    public ResponseResult<?> sendRouteInfo(@RequestParam String routeCode) {
+        if (client.getReadyState() == ReadyState.OPEN) {
+            String waypoints = constructRouteData(routeCode);
+            log.debug("发送航点数据到船控{}", waypoints);
+            client.send(waypoints);
+            return ResponseUtil.successResponse();
+        } else {
+            return ResponseUtil.failResponse("发送数据失败:连接未打开");
+        }
+    }
+
+    private String constructRouteData(String routeCode) {
+        try {
+            Waypoint waypoint = new Waypoint();
+            waypoint.setRouteCode(routeCode);
+            List<Waypoint> waypointByCondition = waypointService.getWaypointByCondition(waypoint);
+
+            if (waypointByCondition != null && !waypointByCondition.isEmpty()) {
+                List<Map<String, Double>> coordinates = waypointByCondition.stream()
+                        .sorted(Comparator.comparing(Waypoint::getSequence))
+                        .map(wp -> {
+                            Map<String, Double> map = new HashMap<>();
+                            map.put("longitude", wp.getLongitude());
+                            map.put("latitude", wp.getLatitude());
+                            return map;
+                        })
+                        .collect(Collectors.toList());
+                return JSON.toJSONString(coordinates);
+            }
+        } catch (Exception e) {
+            log.error("构造航路信息失败: " + e);
+        }
+        return "[]";
     }
 }

@@ -43,7 +43,7 @@ public interface IBoatCourseMakingService extends IService<BoatCourseMaking> {
     List<BoatCourseMaking> getAllCoursePoints();
 
     //删除所有航线点
-    boolean deleteAllCoursePoints();
+    void deleteAllCoursePoints();
 
     //航线采集
     BoatCourseMaking collectCourseMaking();

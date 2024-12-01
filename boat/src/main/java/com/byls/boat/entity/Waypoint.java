@@ -54,4 +54,11 @@ public class Waypoint {
      */
     @TableField("arrival_conditions")
     private String arrivalConditions;
+
+    /**
+     * 删除状态，布尔值表示航线点是否已被逻辑删除。
+     * true：已删除；false：未删除。
+     */
+    @TableField("delete_status")
+    private Boolean deleteStatus;
 }

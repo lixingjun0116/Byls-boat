@@ -1,5 +1,6 @@
 package com.byls.boat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.byls.boat.entity.UnmannedShip;
 import com.byls.boat.mapper.UnmannedShipMapper;
@@ -24,8 +25,9 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
     }
 
     @Override
-    public UnmannedShip getUnmannedShip(String deviceId) {
-        return null;
+    public UnmannedShip getUnmannedShip(String boatDeviceId) {
+        //条件查询 根据设备编号查询
+        return this.getOne(new QueryWrapper<UnmannedShip>().eq("ship_code",boatDeviceId));
     }
 
     @Override

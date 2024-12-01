@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @Description 页面航线处理控制层
- * @Date 2024/8/1 14:41
- * @Created by lxj
+ * &#064;Description  页面航线处理控制层
+ * &#064;Date  2024/8/1 14:41
+ * &#064;Created  by lxj
  */
 @RestController
 @RequestMapping("/api/airRoute/v1")

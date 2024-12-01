@@ -1,0 +1,54 @@
+[2024-08-06 11:09:27.235]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 9692 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:09:27.237]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:09:27.237]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:09:28.956]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:09:28.959]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:09:29.480]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.615 seconds (JVM running for 3.753)
+[2024-08-06 11:09:54.203]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:09:54.239]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 11:11:11.555]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 20856 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:11:11.558]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:11:11.558]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:11:13.322]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:11:13.324]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:11:13.921]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.71 seconds (JVM running for 3.78)
+[2024-08-06 11:11:21.944]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:11:21.973]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 11:14:23.066]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 22180 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:14:23.069]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:14:23.069]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:14:24.951]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:14:24.953]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:14:25.418]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.784 seconds (JVM running for 4.2)
+[2024-08-06 11:14:35.020]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:14:35.049]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 11:15:02.039]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 11080 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:15:02.042]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:15:02.042]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:15:03.575]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:15:03.576]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:15:03.996]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.247 seconds (JVM running for 3.343)
+[2024-08-06 11:15:08.907]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:15:08.932]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 11:15:12.838]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:15:12.838]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 11:16:12.657]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 16464 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:16:12.659]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:16:12.660]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:16:14.257]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:16:14.259]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:16:14.726]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.342 seconds (JVM running for 3.324)
+[2024-08-06 11:21:09.313]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 14900 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 11:21:09.316]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 11:21:09.316]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 11:21:10.930]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 11:21:10.932]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 11:21:11.372]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 2.492 seconds (JVM running for 3.29)
+[2024-08-06 11:21:16.427]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==>  Preparing: SELECT id,route_point_name,longitude,latitude,delete_status,order_index,description,created_time,updated_time FROM boat_course_making WHERE delete_status = ? 
+[2024-08-06 11:21:16.452]  DEBUG com.byls.boat.mapper.BoatCourseMakingMapper.selectList debug 143 - ==> Parameters: false(Boolean)
+[2024-08-06 14:34:53.341]  INFO  com.byls.boat.BoatApplication logStarting 50 - Starting BoatApplication on lixingjun with PID 18332 (D:\softWare\work\IdeaWorkSpace\Byls-boat\boat\target\classes started by Administrator in D:\softWare\work\IdeaWorkSpace\Byls-boat)
+[2024-08-06 14:34:53.344]  DEBUG com.byls.boat.BoatApplication logStarting 53 - Running with Spring Boot v2.1.8.RELEASE, Spring v5.1.9.RELEASE
+[2024-08-06 14:34:53.344]  INFO  com.byls.boat.BoatApplication logStartupProfileInfo 648 - No active profile set, falling back to default profiles: default
+[2024-08-06 14:34:55.475]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onOpen 59 - 已连接硬件服务器
+[2024-08-06 14:34:55.491]  INFO  com.byls.boat.config.PersistentHardwareWebSocketClient onMessage 64 - 收到硬件传来的消息: 连接成功
+[2024-08-06 14:34:55.955]  INFO  com.byls.boat.BoatApplication logStarted 59 - Started BoatApplication in 3.107 seconds (JVM running for 4.233)

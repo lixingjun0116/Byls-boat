@@ -40,4 +40,7 @@ public interface IBoatNavigationRecordsService extends IService<BoatNavigationRe
      * @return 航行记录列表
      */
     List<BoatNavigationRecords> getAllNavigationRecords();
+
+    //条件查询
+    BoatNavigationRecords getNavigationRecordsByCondition(BoatNavigationRecords record);
 }

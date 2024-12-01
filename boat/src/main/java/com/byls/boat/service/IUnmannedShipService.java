@@ -13,7 +13,7 @@ public interface IUnmannedShipService extends IService<UnmannedShip> {
     List<UnmannedShip> getUnmannedShipList();
 
     // 获取设备
-    UnmannedShip getUnmannedShip(String deviceId);
+    UnmannedShip getUnmannedShip(String boatDeviceId);
 
     // 添加设备
     boolean addUnmannedShip(UnmannedShip unmannedShip);
