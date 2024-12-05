@@ -1,6 +1,7 @@
 package com.byls.boat.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
+import com.byls.boat.constant.BoatType;
 import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.service.BoatHullService;
 import com.byls.boat.util.RedisUtil;
@@ -20,14 +21,15 @@ public class BoatHullServiceImpl implements BoatHullService {
     private RedisUtil redisUtil;
 
     @Override
-    public BoatLocationInfoVO getCurrentLocation() {
+    public BoatLocationInfoVO getCurrentLocation(String shipCode) {
         try {
-            String gpsData = redisUtil.get(RedisKeyConstants.INTEGRATED_NAVIGATION_INFO);
-            if (gpsData == null){
+            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + shipCode;
+            String navigationData = redisUtil.getByType(BoatType.TOURIST_BOAT, redisKey);
+            if (navigationData == null) {
                 return new BoatLocationInfoVO();
             }
-            return JSON.parseObject(gpsData, BoatLocationInfoVO.class);
-        }catch (Exception e){
+            return JSON.parseObject(navigationData, BoatLocationInfoVO.class);
+        } catch (Exception e) {
             return new BoatLocationInfoVO();
         }
 

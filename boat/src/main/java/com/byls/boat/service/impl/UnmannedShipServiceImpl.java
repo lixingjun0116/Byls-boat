@@ -1,47 +1,129 @@
 package com.byls.boat.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.byls.boat.constant.BoatType;
+import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.UnmannedShip;
+import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
 import com.byls.boat.mapper.UnmannedShipMapper;
+import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
 import com.byls.boat.service.IUnmannedShipService;
+import com.byls.boat.util.RedisUtil;
+import com.byls.boat.vo.BoatLocationInfoVO;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 无人船设备表Service实现类
  */
+@Slf4j
 @Service
 public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, UnmannedShip> implements IUnmannedShipService {
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Autowired
+    private BoatDeviceTypeRelationCatcheService relationCatcheService;
+
     @Override
     public List<UnmannedShip> getUnmannedShipList() {
         try {
             return this.list();
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("获取设备列表失败: " + e);
         }
-        return null;
+        return Collections.emptyList(); // 返回空列表而不是 null
     }
 
     @Override
     public UnmannedShip getUnmannedShip(String boatDeviceId) {
-        //条件查询 根据设备编号查询
-        return this.getOne(new QueryWrapper<UnmannedShip>().eq("ship_code",boatDeviceId));
+        // 条件查询 根据设备编号查询
+        return this.getOne(new QueryWrapper<UnmannedShip>().eq("ship_code", boatDeviceId));
     }
 
     @Override
     public boolean addUnmannedShip(UnmannedShip unmannedShip) {
-        return false;
+        return this.save(unmannedShip);
     }
 
     @Override
     public boolean updateUnmannedShip(UnmannedShip unmannedShip) {
-        return false;
+        return this.updateById(unmannedShip);
     }
 
     @Override
     public boolean deleteUnmannedShip(String deviceId) {
-        return false;
+        return this.removeById(deviceId);
+    }
+
+    @Override
+    public List<UnmannedShip> getUnmannedShipsByType(BoatType boatType) {
+        if (boatType == null) {
+            return Collections.emptyList();
+        }
+        try {
+            QueryWrapper<UnmannedShip> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("ship_type", boatType.getType());
+            return this.list(queryWrapper);
+        } catch (Exception e) {
+            log.error("根据设备类型获取船设备列表失败: " + e);
+        }
+        return Collections.emptyList();
+    }
+
+    // 获取所有船的位置信息
+    @Override
+    public List<BoatLocationInfoVO> getAllBoatLocation() {
+        List<BoatLocationInfoVO> result = new ArrayList<>();
+        try {
+            // 获取所有船类型
+            for (BoatType boatType : BoatType.values()) {
+                log.info("处理船类型: {}", boatType.getType());
+
+                // 获取该船类型的无人船列表
+                List<String> boatDeviceIds = relationCatcheService.getBoatDeviceIdsByDeviceType(boatType.getType());
+                if (boatDeviceIds.isEmpty()) {
+                    log.warn("没有找到 {} 类型的无人船", boatType.getType());
+                    continue;
+                }
+
+                for (String boatDeviceId : boatDeviceIds) {
+                    String redisKey = boatType.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
+                    log.info("获取姿态数据: {}", redisKey);
+                    // 获取导航数据
+                    String navigationData = redisUtil.getByType(boatType, redisKey);
+                    if (StringUtils.isEmpty(navigationData)) {
+                        log.error("redis中无组合导航数据船类型: {}, 设备id: {}", boatType.getType(), boatDeviceId);
+                        continue;
+                    }
+
+                    // 解析导航数据
+                    IntegratedNavigationInfo integratedNavigationInfo = JSON.parseObject(navigationData, IntegratedNavigationInfo.class);
+                    if (integratedNavigationInfo == null) {
+                        log.error("redis转换实体后为空船类型: {}, 设备id: {}", boatType.getType(), boatDeviceId);
+                        continue;
+                    }
+
+                    // 组织返回数据
+                    BoatLocationInfoVO boatLocationInfoVO = new BoatLocationInfoVO();
+                    boatLocationInfoVO.setBoatDeviceId(boatDeviceId);
+                    boatLocationInfoVO.setLongitude(integratedNavigationInfo.getLongitude());
+                    boatLocationInfoVO.setLatitude(integratedNavigationInfo.getLatitude());
+                    result.add(boatLocationInfoVO);
+
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取所有船的位置信息失败: " + e);
+        }
+        return result;
     }
 }

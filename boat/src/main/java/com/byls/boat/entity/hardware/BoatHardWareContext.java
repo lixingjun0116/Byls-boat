@@ -1,5 +1,6 @@
 package com.byls.boat.entity.hardware;
 
+import com.byls.boat.constant.BoatType;
 import lombok.Data;
 
 /**
@@ -11,6 +12,8 @@ import lombok.Data;
 public class BoatHardWareContext {
     //标识符
     private String keyId;
+    //船类型枚举
+    private BoatType boatType;
     //数据
     private String jsonData;
 }

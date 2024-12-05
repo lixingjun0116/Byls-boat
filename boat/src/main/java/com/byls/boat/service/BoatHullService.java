@@ -10,5 +10,5 @@ import com.byls.boat.vo.BoatLocationInfoVO;
 public interface BoatHullService {
 
     //获取船实时坐标
-    BoatLocationInfoVO getCurrentLocation();
+    BoatLocationInfoVO getCurrentLocation(String shipCode);
 }

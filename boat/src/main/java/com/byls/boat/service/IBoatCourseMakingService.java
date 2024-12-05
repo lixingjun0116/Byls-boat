@@ -46,7 +46,7 @@ public interface IBoatCourseMakingService extends IService<BoatCourseMaking> {
     void deleteAllCoursePoints();
 
     //航线采集
-    BoatCourseMaking collectCourseMaking();
+    BoatCourseMaking collectCourseMaking(String shipCode);
 
     //批量更新
     boolean updateBatch(List<BoatCourseMaking> entityList);

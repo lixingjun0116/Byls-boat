@@ -1,15 +1,19 @@
 package com.byls.boat.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
+import com.byls.boat.constant.BoatType;
 import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.BoatNavigationRecords;
 import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
+import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
 import com.byls.boat.service.IBoatNavigationRecordsService;
 import com.byls.boat.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * @Description 定时存储导航记录
@@ -23,29 +27,56 @@ public class BoatNavigationRecordsTiming implements Runnable {
     private RedisUtil redisUtil;
     @Autowired
     private IBoatNavigationRecordsService boatNavigationRecordsService;
+    @Autowired
+    private BoatDeviceTypeRelationCatcheService relationCatcheService;
 
 
     @Override
     public void run() {
         while (true) {
             try {
-                String navigationData = redisUtil.get(RedisKeyConstants.INTEGRATED_NAVIGATION_INFO);
-                if (StringUtils.isEmpty(navigationData)) {
-                    log.error("redis中无组合导航数据!!!");
-                }
-                IntegratedNavigationInfo integratedNavigationInfo = JSON.parseObject(navigationData, IntegratedNavigationInfo.class);
-                if (integratedNavigationInfo == null) {
-                    log.error("redis转换实体后为空!!!");
-                }else {
-                    saveNavigationRecord(integratedNavigationInfo);
+                // 获取所有船类型
+                for (BoatType boatType : BoatType.values()) {
+                    log.info("处理船类型: {}", boatType.getType());
+
+                    // 获取该船类型的无人船列表
+                    List<String> boatIds =  relationCatcheService.getBoatDeviceIdsByDeviceType(boatType.getType());
+                    if (boatIds.isEmpty()) {
+                        log.warn("没有找到 {} 类型的无人船", boatType.getType());
+                        continue;
+                    }
+
+                    for (String boatDeviceId : boatIds) {
+                        String redisKey = boatType.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
+                        log.info("获取姿态数据: {}", redisKey);
+                        // 获取导航数据
+                            String navigationData = redisUtil.getByType(boatType, redisKey);
+                        if (StringUtils.isEmpty(navigationData)) {
+                            log.error("redis中无组合导航数据 for boatType: {}, deviceId: {}", boatType.getType(), boatDeviceId);
+                            continue;
+                        }
+
+                        // 解析导航数据
+                        IntegratedNavigationInfo integratedNavigationInfo = JSON.parseObject(navigationData, IntegratedNavigationInfo.class);
+                        if (integratedNavigationInfo == null) {
+                            log.error("redis转换实体后为空 for boatType: {}, deviceId: {}", boatType.getType(), boatDeviceId);
+                            continue;
+                        }
+
+                        // 保存导航记录
+                        saveNavigationRecord(integratedNavigationInfo);
+                    }
                 }
             } catch (Exception e) {
-                log.error("定时存储导航记录失败: " + e);
+                log.error("定时存储导航记录失败: {}", e.getMessage(), e);
             }
+
             try {
                 Thread.sleep(1000 * 10);
             } catch (InterruptedException e) {
-                log.error("定时存储导航记录线程处理异常: " + e);
+                log.error("定时存储导航记录线程处理异常: " + e.getMessage(), e);
+                // 重新设置中断状态
+                Thread.currentThread().interrupt();
             }
         }
     }

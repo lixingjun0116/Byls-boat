@@ -8,6 +8,7 @@ import com.byls.boat.service.BoatHullService;
 import com.byls.boat.service.IWaypointService;
 import com.byls.boat.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.java_websocket.enums.ReadyState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -113,8 +114,11 @@ public class HullController {
 
     //获取船实时坐标
     @GetMapping("/getBoatLocation")
-    public ResponseResult<?> getBoatLocation() {
-        return ResponseUtil.successResponse(boatHullService.getCurrentLocation());
+    public ResponseResult<?> getBoatLocation(@RequestParam String shipCode) {
+        if (StringUtils.isNotBlank(shipCode)){
+            return ResponseUtil.successResponse(boatHullService.getCurrentLocation(shipCode));
+        }
+        return ResponseUtil.failResponse();
     }
 
     //通过socket发送航路信息到船控

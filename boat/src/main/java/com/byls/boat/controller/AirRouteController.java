@@ -36,9 +36,9 @@ public class AirRouteController {
 
     //航线采集
     @GetMapping("/collectCourseMaking")
-    public ResponseResult<?> collectCourseMaking() {
+    public ResponseResult<?> collectCourseMaking(@RequestParam("shipCode") String shipCode) {
         try {
-            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking();
+            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking(shipCode);
             if (boatCourseMaking == null) {
                 return ResponseUtil.failResponse();
             }

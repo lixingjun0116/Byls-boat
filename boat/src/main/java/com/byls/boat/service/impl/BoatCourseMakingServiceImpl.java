@@ -1,10 +1,11 @@
 package com.byls.boat.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.byls.boat.constant.BoatType;
 import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.BoatCourseMaking;
 import com.byls.boat.entity.BoatNavigationRecords;
@@ -124,15 +125,16 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
      * &#064;date  2024/8/2 10:13
      */
     @Override
-    public BoatCourseMaking collectCourseMaking() {
-        //  采集航线数据   每点击一次采集    获取缓存中硬件设备传的gps定位   存入一条到航线制作表    将这条数据返回页面
+    public BoatCourseMaking collectCourseMaking(String shipCode) {
+        // 采集航线数据   每点击一次采集    获取缓存中硬件设备传的gps定位   存入一条到航线制作表    将这条数据返回页面
         try {
-            String gpsData = redisUtil.get(RedisKeyConstants.INTEGRATED_NAVIGATION_INFO);
-            if (gpsData == null){
+            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + shipCode;
+            String navigationData = redisUtil.getByType(BoatType.TOURIST_BOAT, redisKey);
+            if (navigationData == null){
+                log.error("获取缓存导航数据失败:{}"+redisKey);
                 return null;
             }
-            BoatNavigationRecords newRecord = JSON.parseObject(gpsData, BoatNavigationRecords.class);
-
+            BoatNavigationRecords newRecord = JSON.parseObject(navigationData, BoatNavigationRecords.class);
             BoatCourseMaking course = new BoatCourseMaking();
             course.setLatitude(newRecord.getLatitude());
             course.setLongitude(newRecord.getLongitude());
