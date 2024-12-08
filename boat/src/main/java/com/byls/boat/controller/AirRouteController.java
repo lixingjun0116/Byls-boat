@@ -36,9 +36,9 @@ public class AirRouteController {
 
     //航线采集
     @GetMapping("/collectCourseMaking")
-    public ResponseResult<?> collectCourseMaking(@RequestParam("shipCode") String shipCode) {
+    public ResponseResult<?> collectCourseMaking(@RequestParam("boatDeviceId") String boatDeviceId) {
         try {
-            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking(shipCode);
+            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking(boatDeviceId);
             if (boatCourseMaking == null) {
                 return ResponseUtil.failResponse();
             }
@@ -103,7 +103,7 @@ public class AirRouteController {
 
     //该船是否存在有效航线 入参：船设备id
     @GetMapping("/isExistRoute")
-    public ResponseResult<?> isExistRoute(@RequestParam String boatDeviceId) {
+    public ResponseResult<?> isExistRoute(@RequestParam("boatDeviceId") String boatDeviceId) {
         try {
             return ResponseUtil.successResponse(boatCourseMakingService.isExistValidRoute(boatDeviceId));
         } catch (Exception e) {

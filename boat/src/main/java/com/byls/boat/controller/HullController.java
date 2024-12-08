@@ -114,9 +114,9 @@ public class HullController {
 
     //获取船实时坐标
     @GetMapping("/getBoatLocation")
-    public ResponseResult<?> getBoatLocation(@RequestParam String shipCode) {
-        if (StringUtils.isNotBlank(shipCode)){
-            return ResponseUtil.successResponse(boatHullService.getCurrentLocation(shipCode));
+    public ResponseResult<?> getBoatLocation(@RequestParam("boatDeviceId") String boatDeviceId) {
+        if (StringUtils.isNotBlank(boatDeviceId)){
+            return ResponseUtil.successResponse(boatHullService.getCurrentLocation(boatDeviceId));
         }
         return ResponseUtil.failResponse();
     }

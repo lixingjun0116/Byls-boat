@@ -21,9 +21,9 @@ public class BoatHullServiceImpl implements BoatHullService {
     private RedisUtil redisUtil;
 
     @Override
-    public BoatLocationInfoVO getCurrentLocation(String shipCode) {
+    public BoatLocationInfoVO getCurrentLocation(String boatDeviceId) {
         try {
-            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + shipCode;
+            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
             String navigationData = redisUtil.getByType(BoatType.TOURIST_BOAT, redisKey);
             if (navigationData == null) {
                 return new BoatLocationInfoVO();

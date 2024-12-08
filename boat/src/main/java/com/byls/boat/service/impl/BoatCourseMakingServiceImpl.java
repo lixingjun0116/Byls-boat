@@ -125,10 +125,10 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
      * &#064;date  2024/8/2 10:13
      */
     @Override
-    public BoatCourseMaking collectCourseMaking(String shipCode) {
+    public BoatCourseMaking collectCourseMaking(String boatDeviceId) {
         // 采集航线数据   每点击一次采集    获取缓存中硬件设备传的gps定位   存入一条到航线制作表    将这条数据返回页面
         try {
-            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + shipCode;
+            String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
             String navigationData = redisUtil.getByType(BoatType.TOURIST_BOAT, redisKey);
             if (navigationData == null){
                 log.error("获取缓存导航数据失败:{}"+redisKey);
@@ -146,9 +146,9 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
             this.save(course);
             return course;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取缓存导航数据失败:{}",e);
         }
-        log.error("获取缓存航线数据失败");
+        log.error("获取缓存航线数据失败,返回空");
         return null;
     }
 

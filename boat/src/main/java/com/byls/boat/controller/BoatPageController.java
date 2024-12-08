@@ -2,6 +2,7 @@ package com.byls.boat.controller;
 
 import com.byls.boat.common.ResponseResult;
 import com.byls.boat.constant.BoatType;
+import com.byls.boat.entity.BoatTypeInfo;
 import com.byls.boat.entity.Waypoint;
 import com.byls.boat.service.IRouteService;
 import com.byls.boat.service.IUnmannedShipService;
@@ -13,6 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description 页面控制、加载
@@ -68,21 +73,25 @@ public class BoatPageController {
     }
 
     //获取船类型列表
-    @GetMapping("/shipTypeList")
+    @GetMapping("/boatTypeList")
     public ResponseResult<?> shipTypeList() {
         try {
-            return ResponseUtil.successResponse(BoatType.values());
+            List<BoatTypeInfo> boatTypeInfos = Arrays.stream(BoatType.values())
+                    .map(boatType -> new BoatTypeInfo(boatType.getType(), boatType.getBoatTypeName()))
+                    .collect(Collectors.toList());
+            return ResponseUtil.successResponse(boatTypeInfos);
         } catch (Exception e) {
             log.error("获取船类型列表失败: {}", String.valueOf(e));
             return ResponseUtil.failResponse();
         }
     }
 
+
     //根据船类型获取船列表
     @GetMapping("/boatListByType")
-    public ResponseResult<?> boatListByType(@RequestParam String shipType) {
+    public ResponseResult<?> boatListByType(@RequestParam String boatType) {
         try {
-            return ResponseUtil.successResponse(unmannedShipService.getUnmannedShipsByType(BoatType.fromType(shipType)));
+            return ResponseUtil.successResponse(unmannedShipService.getUnmannedShipsByType(BoatType.fromType(boatType)));
         } catch (Exception e) {
             log.error("根据船类型获取船列表失败: {}", String.valueOf(e));
             return ResponseUtil.failResponse();
