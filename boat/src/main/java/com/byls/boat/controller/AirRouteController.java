@@ -25,9 +25,9 @@ public class AirRouteController {
 
     //航线准备
     @GetMapping("/prepareCourseMaking")
-    public ResponseResult<?> prepareCourseMaking() {
+    public ResponseResult<?> prepareCourseMaking(@RequestParam("boatDeviceId") String boatDeviceId) {
         try {
-            boatCourseMakingService.deleteAllCoursePoints();
+            boatCourseMakingService.deleteAllCoursePoints(boatDeviceId);
         } catch (Exception e) {
             return ResponseUtil.failResponse();
         }
@@ -64,9 +64,9 @@ public class AirRouteController {
 
     //查询航线制作表数据
     @GetMapping("/courseMakingList")
-    public ResponseResult<?> queryCourseMaking() {
+    public ResponseResult<?> queryCourseMaking(@RequestParam("boatDeviceId") String boatDeviceId) {
         try {
-            return ResponseUtil.successResponse(boatCourseMakingService.getAllCoursePoints());
+            return ResponseUtil.successResponse(boatCourseMakingService.getAllCoursePoints(boatDeviceId));
         } catch (Exception e) {
             return ResponseUtil.failResponse();
         }
@@ -91,6 +91,7 @@ public class AirRouteController {
             return ResponseUtil.failResponse();
         }
     }
+
     //删除航线制作表数据
     @GetMapping("/deleteCourseMaking")
     public ResponseResult<?> deleteCourseMaking(@RequestParam Integer id) {

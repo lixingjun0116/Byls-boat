@@ -3,9 +3,9 @@ package com.byls.boat.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.byls.boat.constant.BoatType;
 import com.byls.boat.entity.UnmannedShip;
-import com.byls.boat.vo.BoatLocationInfoVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 无人船设备表Service接口
@@ -30,5 +30,5 @@ public interface IUnmannedShipService extends IService<UnmannedShip> {
     List<UnmannedShip> getUnmannedShipsByType(BoatType boatType);
 
     //获取所有船当前坐标点
-    List<BoatLocationInfoVO> getAllBoatLocation();
+    Map<String, List<Double>> getAllBoatLocation();
 }

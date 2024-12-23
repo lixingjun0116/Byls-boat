@@ -11,15 +11,12 @@ import com.byls.boat.mapper.UnmannedShipMapper;
 import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
 import com.byls.boat.service.IUnmannedShipService;
 import com.byls.boat.util.RedisUtil;
-import com.byls.boat.vo.BoatLocationInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 无人船设备表Service实现类
@@ -81,8 +78,8 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
 
     // 获取所有船的位置信息
     @Override
-    public List<BoatLocationInfoVO> getAllBoatLocation() {
-        List<BoatLocationInfoVO> result = new ArrayList<>();
+    public Map<String, List<Double>> getAllBoatLocation() {
+        Map<String, List<Double>> result = new HashMap<>();
         try {
             // 获取所有船类型
             for (BoatType boatType : BoatType.values()) {
@@ -113,12 +110,8 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
                     }
 
                     // 组织返回数据
-                    BoatLocationInfoVO boatLocationInfoVO = new BoatLocationInfoVO();
-                    boatLocationInfoVO.setBoatDeviceId(boatDeviceId);
-                    boatLocationInfoVO.setLongitude(integratedNavigationInfo.getLongitude());
-                    boatLocationInfoVO.setLatitude(integratedNavigationInfo.getLatitude());
-                    result.add(boatLocationInfoVO);
-
+                    List<Double> location = Arrays.asList(integratedNavigationInfo.getLongitude(), integratedNavigationInfo.getLatitude());
+                    result.put(boatDeviceId, location);
                 }
             }
         } catch (Exception e) {
@@ -126,4 +119,5 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
         }
         return result;
     }
+
 }

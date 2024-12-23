@@ -68,5 +68,9 @@ public class BoatCourseMaking {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updatedTime;
 
-
+    /**
+     * 船设备编号
+     */
+    @TableField(value = "boat_device_id")
+    private String boatDeviceId;
 }

@@ -94,23 +94,25 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
      * @return 航线点列表
      */
     @Override
-    public List<BoatCourseMaking> getAllCoursePoints() {
+    public List<BoatCourseMaking> getAllCoursePoints(String boatDeviceId) {
         try {
             LambdaQueryWrapper<BoatCourseMaking> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(BoatCourseMaking::getDeleteStatus, false);
+            //船设备id
+            queryWrapper.eq(BoatCourseMaking::getBoatDeviceId, boatDeviceId);
             //根据下标 升序排列
             queryWrapper.orderByAsc(BoatCourseMaking::getOrderIndex);
             return this.getBaseMapper().selectList(queryWrapper);
-        }catch (Exception e) {
-            log.error("获取缓存航线数据失败:{}",e);
+        } catch (Exception e) {
+            log.error("获取缓存航线数据失败:{}", e);
         }
         return null;
     }
 
     @Override
-    public void deleteAllCoursePoints() {
+    public void deleteAllCoursePoints(String boatDeviceId) {
         LambdaUpdateWrapper<BoatCourseMaking> updateWrapper = new LambdaUpdateWrapper<>();
-
+        updateWrapper.eq(BoatCourseMaking::getBoatDeviceId, boatDeviceId);
         updateWrapper.eq(BoatCourseMaking::getDeleteStatus, false);
         updateWrapper.set(BoatCourseMaking::getDeleteStatus, true);
 
@@ -130,30 +132,32 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
         try {
             String redisKey = BoatType.TOURIST_BOAT.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
             String navigationData = redisUtil.getByType(BoatType.TOURIST_BOAT, redisKey);
-            if (navigationData == null){
-                log.error("获取缓存导航数据失败:{}"+redisKey);
+            if (navigationData == null) {
+                log.error("获取缓存导航数据失败:{}" + redisKey);
                 return null;
             }
             BoatNavigationRecords newRecord = JSON.parseObject(navigationData, BoatNavigationRecords.class);
             BoatCourseMaking course = new BoatCourseMaking();
+            course.setBoatDeviceId(boatDeviceId);
             course.setLatitude(newRecord.getLatitude());
             course.setLongitude(newRecord.getLongitude());
             //获取数据库总条数
-            course.setOrderIndex(countByDeleteStatus() + 1);
+            course.setOrderIndex(countByDeleteStatus(boatDeviceId) + 1);
             course.setCreatedTime(new Date());
             course.setUpdatedTime(new Date());
             course.setDeleteStatus(false);
             this.save(course);
             return course;
         } catch (Exception e) {
-            log.error("获取缓存导航数据失败:{}",e);
+            log.error("获取缓存导航数据失败:{}", e);
         }
         log.error("获取缓存航线数据失败,返回空");
         return null;
     }
 
-    private int countByDeleteStatus() {
+    private int countByDeleteStatus(String boatDeviceId) {
         QueryWrapper<BoatCourseMaking> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("boat_device_id", boatDeviceId);
         queryWrapper.eq("delete_status", false);
         return this.count(queryWrapper);
     }
@@ -192,8 +196,8 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
                 // 如果航点也保存成功，则整个操作成功
                 return waypointService.saveBatch(waypoints);
             }
-        }catch (Exception e) {
-            log.error("保存航线数据失败:{}",e);
+        } catch (Exception e) {
+            log.error("保存航线数据失败:{}", e);
         }
         // 如果Route保存失败，直接返回false
         return false;

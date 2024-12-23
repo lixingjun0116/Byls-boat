@@ -40,10 +40,10 @@ public interface IBoatCourseMakingService extends IService<BoatCourseMaking> {
      * 获取所有航线点
      * @return 航线点列表
      */
-    List<BoatCourseMaking> getAllCoursePoints();
+    List<BoatCourseMaking> getAllCoursePoints(String boatDeviceId);
 
     //删除所有航线点
-    void deleteAllCoursePoints();
+    void deleteAllCoursePoints(String boatDeviceId);
 
     //航线采集
     BoatCourseMaking collectCourseMaking(String boatDeviceId);
