@@ -44,9 +44,12 @@ public class PersistentHardwareWebSocketClient extends WebSocketClient {
                 }
             } catch (InterruptedException e) {
                 retries++;
-                log.info("尝试重新连接 " + retries + " 失败重试…");
+                log.info("尝试重新连接 {} 失败重试…", retries);
             } catch (IllegalStateException ise) {
-                log.error("WebSocket 客户端不可重用: " + ise.getMessage());
+                log.error("WebSocket 客户端不可重用: {}", ise.getMessage());
+                retries++;
+            } catch (Exception e) {
+                log.error("发生错误: {}", e.getMessage());
                 retries++;
             }
         }
@@ -72,8 +75,7 @@ public class PersistentHardwareWebSocketClient extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        log.error("发生错误: " + ex.getMessage());
-        ex.printStackTrace();
+        log.error("websocket发生异常: {}", ex.getMessage());
     }
 
     public ReadyState getReadyState() {

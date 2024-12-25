@@ -2,6 +2,7 @@
 package com.byls.boat.config.redis;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.byls.boat.constant.BoatType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +21,6 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * redis配置
@@ -50,18 +49,9 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Value("${spring.redis.password}")
     String password;
 
-    // 船类型与数据库索引的映射关系
-    private static final Map<String, Integer> BOAT_TYPE_DB_MAP = new HashMap<>();
-
-    static {
-        BOAT_TYPE_DB_MAP.put("tourist_boat", 0);
-        BOAT_TYPE_DB_MAP.put("dolphin", 2);
-        BOAT_TYPE_DB_MAP.put("target_boat", 3);
-    }
-
     @Bean("generalRedisTemplate")
     @Primary
-    @SuppressWarnings(value = { "unchecked", "rawtypes" })
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public RedisTemplate<Object, Object> redisTemplate(@Value("${spring.redis.database.db3}") int database) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory(database, hostName, port, password));
@@ -185,11 +175,10 @@ public class RedisConfig extends CachingConfigurerSupport {
      * @return RedisTemplate
      */
     public RedisTemplate<Object, Object> getRedisTemplateByBoatType(String boatType) {
-        Integer database = BOAT_TYPE_DB_MAP.get(boatType);
-        if (database == null) {
-            throw new IllegalArgumentException("未知的船型: " + boatType);
-        }
-        log.info("获取 RedisTemplate for boatType: {}, database: {}", boatType, database);
+        // 使用 BoatType 枚举获取数据库索引
+        int database = BoatType.fromType(boatType).getDbIndex();
+
+        log.info("获取boatType重新配置模板: {}, database: {}", boatType, database);
         switch (database) {
             case 0:
                 return redisFastTemplate(database);

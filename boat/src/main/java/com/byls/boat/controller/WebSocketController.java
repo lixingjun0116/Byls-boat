@@ -1,33 +1,32 @@
+// com.byls.boat.controller.WebSocketController.java
 package com.byls.boat.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.byls.boat.constant.BoatType;
-import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.hardware.BoatHardWareContext;
-import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
-import com.byls.boat.entity.hardware.MotorInfo;
-import com.byls.boat.entity.hardware.SensorInfo;
 import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
+import com.byls.boat.service.devicehandler.DeviceHandler;
+import com.byls.boat.service.devicehandler.IntegratedNavigationHandler;
+import com.byls.boat.service.devicehandler.MotorHandler;
+import com.byls.boat.service.devicehandler.SensorHandler;
+import com.byls.boat.util.RateLimiter;
 import com.byls.boat.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
-/*websocket接收各端的数据：目前接收船端姿态信息、传感器数据、发动机数据*/
 @Slf4j
 @Component
-@RestController
 public class WebSocketController extends TextWebSocketHandler {
     @Autowired
     private RedisUtil redisUtil;
@@ -35,8 +34,13 @@ public class WebSocketController extends TextWebSocketHandler {
     private BoatDeviceTypeRelationCatcheService relationCatcheService;
 
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private WebSocketSession hardwareSession;
+    private final AtomicReference<WebSocketSession> hardwareSession = new AtomicReference<>();
 
+    private final DeviceHandler integratedNavigationHandler = new IntegratedNavigationHandler();
+    private final DeviceHandler motorHandler = new MotorHandler();
+    private final DeviceHandler sensorHandler = new SensorHandler();
+    // 先暂定每秒最多允许有1个请求，后期如果需要不同类型数据做不同的限流就再改吧
+    private final RateLimiter rateLimiter = new RateLimiter(1000);
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
@@ -45,7 +49,7 @@ public class WebSocketController extends TextWebSocketHandler {
 
         // 如果是硬件设备连接，保存会话
         if (Objects.requireNonNull(session.getUri()).getPath().endsWith("/hardware")) {
-            hardwareSession = session;
+            hardwareSession.set(session);
         }
     }
 
@@ -62,15 +66,16 @@ public class WebSocketController extends TextWebSocketHandler {
         log.info("接收到消息: {}", payload);
 
         // 硬件设备发送的消息
-        if (session.equals(hardwareSession)) {
-            storeHardWareData(payload);
+        WebSocketSession currentHardwareSession = hardwareSession.get();
+        if (session.equals(currentHardwareSession)) {
+            storeHardWareData(session.getId(),payload);
         }
     }
 
-    private void storeHardWareData(String payload) {
+    private void storeHardWareData(String clientId,String payload) {
         try {
             if (payload == null || payload.isEmpty()) {
-                log.error("payload 不能为空");
+                log.warn("payload 不能为空");
                 return;
             }
 
@@ -79,73 +84,52 @@ public class WebSocketController extends TextWebSocketHandler {
             String jsonData = hardWareContext.getJsonData();
 
             if (keyId == null || keyId.isEmpty()) {
-                log.error("keyId数据为空");
+                log.warn("keyId数据为空");
                 return;
             }
             if (jsonData == null || jsonData.isEmpty()) {
-                log.error("jsonData数据为空");
+                log.warn("jsonData数据为空");
+                return;
+            }
+
+            // 限流逻辑
+            if (!rateLimiter.shipPushDataLimit(clientId, keyId)) {
+                log.warn("高频请求被限流: clientId={}, keyId={}", clientId, keyId);
                 return;
             }
 
             // 根据不同标识符keyId，解析存储不同设备信息
             switch (keyId) {
                 case "A01":
-                    handleIntegratedNavigationInfo(jsonData);
+                    handleDeviceInfo(jsonData, integratedNavigationHandler);
                     break;
                 case "A02":
-                    handleMotorInfo(jsonData);
+                    handleDeviceInfo(jsonData, motorHandler);
                     break;
                 case "A03":
-                    handleSensorInfo(jsonData);
+                    handleDeviceInfo(jsonData, sensorHandler);
                     break;
                 default:
                     log.error("未知的标识: {}", keyId);
             }
+        } catch (JSONException e) {
+            log.error("JSON 解析错误: {}", e.getMessage(), e);
         } catch (Exception e) {
-            log.error("存储设备数据失败: " + e);
+            log.error("存储设备数据失败", e);
         }
     }
 
-    private void handleIntegratedNavigationInfo(String jsonData) {
+    private void handleDeviceInfo(String jsonData, DeviceHandler handler) {
         try {
-            IntegratedNavigationInfo integratedNavigationInfo = JSON.parseObject(jsonData, IntegratedNavigationInfo.class);
-            if (integratedNavigationInfo == null) {
-                log.error("redis转换实体后为空jsonData: {}", jsonData);
+            Object deviceInfo = handler.parse(jsonData);
+            if (deviceInfo == null) {
+                log.warn("解析设备数据失败: {}", jsonData);
                 return;
             }
-            String boatDeviceId = integratedNavigationInfo.getBoatDeviceId();
-            saveToRedis(boatDeviceId, RedisKeyConstants.INTEGRATED_NAVIGATION_INFO, jsonData);
+            String deviceId = handler.getDeviceId(deviceInfo);
+            saveToRedis(deviceId, handler.getKeySuffix(), jsonData);
         } catch (Exception e) {
-            log.error("解析姿态数据失败: " + e);
-        }
-    }
-
-    private void handleMotorInfo(String jsonData) {
-        try {
-            List<MotorInfo> motorInfos = JSON.parseObject(jsonData, new TypeReference<List<MotorInfo>>() {
-            });
-            if (motorInfos == null || motorInfos.isEmpty()) {
-                log.error("redis转换实体后为空payload: {}", jsonData);
-                return;
-            }
-            String boatDeviceId = motorInfos.get(0).getBoatDeviceId();
-            saveToRedis(boatDeviceId, RedisKeyConstants.MOTOR_INFO, jsonData);
-        } catch (Exception e) {
-            log.error("解析发动机数据失败: {}", String.valueOf(e));
-        }
-    }
-
-    private void handleSensorInfo(String jsonData) {
-        try {
-            SensorInfo sensorInfo = JSON.parseObject(jsonData, SensorInfo.class);
-            if (sensorInfo == null) {
-                log.error("redis转换实体后为空: {}", jsonData);
-                return;
-            }
-            String deviceId = sensorInfo.getBoatDeviceId();
-            saveToRedis(deviceId, RedisKeyConstants.SENSOR_INFO, jsonData);
-        } catch (Exception e) {
-            log.error("解析传感器数据失败: {}", String.valueOf(e));
+            log.error("处理设备数据失败", e);
         }
     }
 

@@ -90,7 +90,7 @@ public class BoatDeviceTypeRelationCatcheService {
     }
 
     /**
-     * 获取 deviceTypeToBoatDeviceIdsMap，如果缓存为空则从数据库中查询并更新 Redis
+     * 获取 deviceTypeToBoatDeviceIdsMap，如果缓存为空则从数据库中查询并更新 Redis（暂时没用上，后续看看有必要执行此操作吗）
      *
      * @return deviceTypeToBoatDeviceIdsMap
      */
@@ -104,7 +104,7 @@ public class BoatDeviceTypeRelationCatcheService {
     }
 
     /**
-     * 获取 boatDeviceIdToDeviceTypeMap，如果缓存为空则从数据库中查询并更新 Redis
+     * 获取 boatDeviceIdToDeviceTypeMap，如果缓存为空则从数据库中查询并更新 Redis（暂时也没用上，后续看看有必要执行此操作吗）
      *
      * @return boatDeviceIdToDeviceTypeMap
      */

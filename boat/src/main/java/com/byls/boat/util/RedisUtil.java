@@ -105,7 +105,7 @@ public class RedisUtil {
 
     public <K, V> void setHash(String key, Map<K, V> value) {
         if (key == null || value == null) {
-            throw new IllegalArgumentException("Key or value cannot be null");
+            throw new IllegalArgumentException("键或值不能为空");
         }
 
         // 创建一个新的 Map 来存储转换后的键值对
@@ -116,7 +116,7 @@ public class RedisUtil {
             V valueEntry = entry.getValue();
 
             if (keyEntry == null || valueEntry == null) {
-                throw new IllegalArgumentException("Key or value in the map cannot be null");
+                throw new IllegalArgumentException("映射中的键或值不能为空");
             }
 
             // 将键和值转换为 String 类型
