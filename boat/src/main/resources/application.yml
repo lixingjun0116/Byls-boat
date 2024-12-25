@@ -43,7 +43,7 @@ spring:
   # redis配置
   redis:
     host: 123.249.108.96
-    port: 6380
+    port: 6390
     database:
       db0: 0
       db2: 2

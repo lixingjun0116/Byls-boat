@@ -122,7 +122,8 @@ public class WebSocketController extends TextWebSocketHandler {
 
     private void handleMotorInfo(String jsonData) {
         try {
-            List<MotorInfo> motorInfos = JSON.parseObject(jsonData, new TypeReference<List<MotorInfo>>() {});
+            List<MotorInfo> motorInfos = JSON.parseObject(jsonData, new TypeReference<List<MotorInfo>>() {
+            });
             if (motorInfos == null || motorInfos.isEmpty()) {
                 log.error("redis转换实体后为空payload: {}", jsonData);
                 return;
@@ -155,6 +156,6 @@ public class WebSocketController extends TextWebSocketHandler {
             return;
         }
         String redisKeyPrefix = deviceTypeByBoatDeviceId + ":" + keySuffix + ":" + deviceId;
-        redisUtil.setByType(BoatType.valueOf(deviceTypeByBoatDeviceId), redisKeyPrefix, jsonData);
+        redisUtil.setByType(BoatType.fromType(deviceTypeByBoatDeviceId), redisKeyPrefix, jsonData);
     }
 }
