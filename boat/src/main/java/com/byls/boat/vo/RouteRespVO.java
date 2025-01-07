@@ -43,7 +43,11 @@ public class RouteRespVO {
      * 航线的状态
      */
     private Integer status;
-
+    /**
+     * 航线是否启用
+     * true：启用；false：未启用。
+     */
+    private Boolean enableStatus;
     //船设备编号
     private String boatDeviceId;
     //船设备名称

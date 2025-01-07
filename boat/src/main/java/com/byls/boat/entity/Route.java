@@ -55,6 +55,13 @@ public class Route {
     @TableField(value = "status")
     private Integer status;
 
+    /**
+     * 航线是否启用
+     * true：启用；false：未启用。
+     */
+    @TableField("enable_status")
+    private Boolean enableStatus;
+
     //船设备编号
     @TableField(value = "boat_device_id")
     private String boatDeviceId;

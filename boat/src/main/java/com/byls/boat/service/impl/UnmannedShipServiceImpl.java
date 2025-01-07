@@ -8,8 +8,8 @@ import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.UnmannedShip;
 import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
 import com.byls.boat.mapper.UnmannedShipMapper;
-import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
 import com.byls.boat.service.IUnmannedShipService;
+import com.byls.boat.service.catchhandler.CacheCenter;
 import com.byls.boat.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +28,7 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
     private RedisUtil redisUtil;
 
     @Autowired
-    private BoatDeviceTypeRelationCatcheService relationCatcheService;
+    private CacheCenter cacheCenter;
 
     @Override
     public List<UnmannedShip> getUnmannedShipList() {
@@ -37,7 +37,7 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
         } catch (Exception e) {
             log.error("获取设备列表失败: " + e);
         }
-        return Collections.emptyList(); // 返回空列表而不是 null
+        return Collections.emptyList();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
                 log.info("处理船类型: {}", boatType.getType());
 
                 // 获取该船类型的无人船列表
-                List<String> boatDeviceIds = relationCatcheService.getBoatDeviceIdsByDeviceType(boatType.getType());
+                List<String> boatDeviceIds = cacheCenter.getBoatDeviceIdsByDeviceType(boatType.getType());
                 if (boatDeviceIds.isEmpty()) {
                     log.warn("没有找到 {} 类型的无人船", boatType.getType());
                     continue;
@@ -94,7 +94,6 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
 
                 for (String boatDeviceId : boatDeviceIds) {
                     String redisKey = boatType.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
-                    log.info("获取姿态数据: {}", redisKey);
                     // 获取导航数据
                     String navigationData = redisUtil.getByType(boatType, redisKey);
                     if (StringUtils.isEmpty(navigationData)) {

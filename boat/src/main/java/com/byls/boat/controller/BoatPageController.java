@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @Description 页面控制、加载
+ * @Description 预览页（首页）控制层管理
  * @Date 2024/8/1 14:39
  * @Created by lxj
  */

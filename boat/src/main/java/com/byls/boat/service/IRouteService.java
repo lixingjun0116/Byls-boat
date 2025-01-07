@@ -16,6 +16,14 @@ public interface IRouteService extends IService<Route> {
     //条件查询航线列表
     List<Route> getRoutesByCondition(Route route);
     //修改航线
-    boolean updateRoute(Route route);
+    boolean updateRouteByCondition(Route route);
+    // 通过id更新航线
+    boolean updateRouteById(Route route);
+
+    //通过航线编号获取航线信息
+    Route getRouteByRouteCode(String routeCode);
+    // 通过船设备id 获取航线集合
+    List<Route> getRoutesByBoatDeviceId(String boatDeviceId);
+
 
 }

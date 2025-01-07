@@ -5,8 +5,8 @@ import com.byls.boat.constant.BoatType;
 import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.BoatNavigationRecords;
 import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
-import com.byls.boat.service.BoatDeviceTypeRelationCatcheService;
 import com.byls.boat.service.IBoatNavigationRecordsService;
+import com.byls.boat.service.catchhandler.CacheCenter;
 import com.byls.boat.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -27,8 +27,9 @@ public class BoatNavigationRecordsTiming implements Runnable {
     private RedisUtil redisUtil;
     @Autowired
     private IBoatNavigationRecordsService boatNavigationRecordsService;
+
     @Autowired
-    private BoatDeviceTypeRelationCatcheService relationCatcheService;
+    private CacheCenter cacheCenter;
 
 
     @Override
@@ -40,7 +41,7 @@ public class BoatNavigationRecordsTiming implements Runnable {
                     log.info("处理船类型: {}", boatType.getType());
 
                     // 获取该船类型的无人船列表
-                    List<String> boatIds =  relationCatcheService.getBoatDeviceIdsByDeviceType(boatType.getType());
+                    List<String> boatIds = cacheCenter.getBoatDeviceIdsByDeviceType(boatType.getType());
                     if (boatIds.isEmpty()) {
                         log.warn("没有找到 {} 类型的无人船", boatType.getType());
                         continue;
@@ -48,9 +49,9 @@ public class BoatNavigationRecordsTiming implements Runnable {
 
                     for (String boatDeviceId : boatIds) {
                         String redisKey = boatType.getType() + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
-                        log.info("获取姿态数据: {}", redisKey);
+
                         // 获取导航数据
-                            String navigationData = redisUtil.getByType(boatType, redisKey);
+                        String navigationData = redisUtil.getByType(boatType, redisKey);
                         if (StringUtils.isEmpty(navigationData)) {
                             log.error("redis中无组合导航数据 for boatType: {}, deviceId: {}", boatType.getType(), boatDeviceId);
                             continue;
@@ -64,7 +65,7 @@ public class BoatNavigationRecordsTiming implements Runnable {
                         }
 
                         // 保存导航记录
-                        saveNavigationRecord(integratedNavigationInfo);
+                        saveNavigationRecord(boatDeviceId, integratedNavigationInfo);
                     }
                 }
             } catch (Exception e) {
@@ -74,7 +75,7 @@ public class BoatNavigationRecordsTiming implements Runnable {
             try {
                 Thread.sleep(1000 * 10);
             } catch (InterruptedException e) {
-                log.error("定时存储导航记录线程处理异常: " + e.getMessage(), e);
+                log.error("定时存储导航记录线程处理异常: {}", e.getMessage(), e);
                 // 重新设置中断状态
                 Thread.currentThread().interrupt();
             }
@@ -82,15 +83,16 @@ public class BoatNavigationRecordsTiming implements Runnable {
     }
 
     //保存导航记录的条件
-    private void saveNavigationRecord(IntegratedNavigationInfo integratedNavigationInfo) {
+    private void saveNavigationRecord(String boatDeviceId, IntegratedNavigationInfo integratedNavigationInfo) {
         BoatNavigationRecords record = new BoatNavigationRecords();
-        record.setBoatDeviceId(integratedNavigationInfo.getBoatDeviceId());
+        record.setBoatDeviceId(boatDeviceId);
         BoatNavigationRecords navigationRecord = boatNavigationRecordsService.getNavigationRecordsByCondition(record);
 
         if (navigationRecord == null) {
-            log.error("当前设备编号：{}，没有航点数据", integratedNavigationInfo.getBoatDeviceId());
-            record.setBoatDeviceId(integratedNavigationInfo.getBoatDeviceId());
-            record.setDeviceName(integratedNavigationInfo.getDeviceName());
+            log.error("当前设备编号：{}，没有航点数据", boatDeviceId);
+            record.setBoatDeviceId(boatDeviceId);
+            // todo 后续再处理船名称问题
+            /*record.setDeviceName(integratedNavigationInfo.getDeviceName());*/
             record.setHeading(integratedNavigationInfo.getHeading());
             record.setHeadingAngle(integratedNavigationInfo.getHeadingAngle());
             record.setHeadingAngleSpeed(integratedNavigationInfo.getHeadingAngleSpeed());
@@ -98,7 +100,7 @@ public class BoatNavigationRecordsTiming implements Runnable {
             record.setLatitude(integratedNavigationInfo.getLatitude());
             record.setCreatedTime(new java.util.Date());
             if (boatNavigationRecordsService.addNavigationRecord(record)) {
-                log.info("当前设备编号：{}，第一次保存航点数据成功!", integratedNavigationInfo.getBoatDeviceId());
+                log.info("当前设备编号：{}，第一次保存航点数据成功!", boatDeviceId);
             }
             return;
         }
@@ -114,15 +116,16 @@ public class BoatNavigationRecordsTiming implements Runnable {
         // 航点数据和表中最后一条新数据经纬度在2米以内，或者航点数据速度小于0.05，不保存
         if (latitudeDelta <= distanceThreshold && longitudeDelta <= distanceThreshold || navigationRecord.getHeadingAngleSpeed() < speedThreshold) {
             log.info("设备编号：{}，航点数据未发生变化,可能停船不需要保存!!!。当前经纬度：({}, {})，将要记录的经纬度：({}, {})，航向角速度：{}",
-                    integratedNavigationInfo.getBoatDeviceId(),
+                    boatDeviceId,
                     integratedNavigationInfo.getLatitude(),
                     integratedNavigationInfo.getLongitude(),
                     navigationRecord.getLatitude(),
                     navigationRecord.getLongitude(),
                     navigationRecord.getHeadingAngleSpeed());
         } else {
-            record.setBoatDeviceId(integratedNavigationInfo.getBoatDeviceId());
-            record.setDeviceName(integratedNavigationInfo.getDeviceName());
+            record.setBoatDeviceId(boatDeviceId);
+            // todo 后续再处理船名称问题
+            /*record.setDeviceName(integratedNavigationInfo.getDeviceName());*/
             record.setHeading(integratedNavigationInfo.getHeading());
             record.setHeadingAngle(integratedNavigationInfo.getHeadingAngle());
             record.setHeadingAngleSpeed(integratedNavigationInfo.getHeadingAngleSpeed());
@@ -130,7 +133,7 @@ public class BoatNavigationRecordsTiming implements Runnable {
             record.setLatitude(integratedNavigationInfo.getLatitude());
             record.setCreatedTime(new java.util.Date());
             if (boatNavigationRecordsService.addNavigationRecord(record)) {
-                log.info("设备编号：{}，定时保存航点数据成功!", integratedNavigationInfo.getBoatDeviceId());
+                log.info("设备编号：{}，定时保存航点数据成功!", boatDeviceId);
             }
         }
     }

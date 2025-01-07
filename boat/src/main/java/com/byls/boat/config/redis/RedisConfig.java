@@ -177,8 +177,6 @@ public class RedisConfig extends CachingConfigurerSupport {
     public RedisTemplate<Object, Object> getRedisTemplateByBoatType(String boatType) {
         // 使用 BoatType 枚举获取数据库索引
         int database = BoatType.fromType(boatType).getDbIndex();
-
-        log.info("获取boatType重新配置模板: {}, database: {}", boatType, database);
         switch (database) {
             case 0:
                 return redisFastTemplate(database);

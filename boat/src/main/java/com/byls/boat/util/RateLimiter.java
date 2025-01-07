@@ -12,8 +12,8 @@ public class RateLimiter {
     }
 
     // 限制每台船每秒只能发送一条数据；做一下限流没必要传那么快,没啥用
-    public boolean shipPushDataLimit(String clientId, String keyId) {
-        String compositeKey = clientId + ":" + keyId;
+    public boolean shipPushDataLimit(String clientId, String function) {
+        String compositeKey = clientId + ":" + function;
         long currentTime = System.currentTimeMillis();
 
         CounterInfo counterInfo = counters.computeIfAbsent(compositeKey, k -> new CounterInfo());
@@ -23,7 +23,6 @@ public class RateLimiter {
             //重置计数器
             counterInfo.reset();
         }
-
         // 增加计数器
         int currentCount = counterInfo.incrementAndGet();
 

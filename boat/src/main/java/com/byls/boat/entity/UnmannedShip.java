@@ -38,23 +38,10 @@ public class UnmannedShip {
     private String shipType;
 
     /**
-     * 无人船的当前状态，航行中、停泊、维护
+     * 无人船的当前状态，0：调试 1：航路
      */
-    @TableField(value = "current_status")
-    private Integer currentStatus;
-
-    /**
-     * 船当前位置坐标经度
-     */
-    @TableField(value = "current_longitude")
-    private Double currentLongitude;
-
-    /**
-     * 船当前位置坐标纬度
-     */
-    @TableField(value = "current_latitude")
-    private Double currentLatitude;
-
+    @TableField(value = "current_mode")
+    private Integer currentMode;
 
     /**
      * 删除状态，布尔值表示航线点是否已被逻辑删除。
@@ -62,4 +49,9 @@ public class UnmannedShip {
      */
     @TableField("delete_status")
     private Boolean deleteStatus;
+    /**
+     * 无人船的websocket地址
+     */
+    @TableField(value = "ws_address")
+    private String wsAddress;
 }

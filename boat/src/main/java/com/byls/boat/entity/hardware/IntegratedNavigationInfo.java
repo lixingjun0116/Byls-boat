@@ -9,10 +9,6 @@ import lombok.Data;
  */
 @Data
 public class IntegratedNavigationInfo {
-    // 设备id
-    private String boatDeviceId;
-    // 设备名称
-    private String deviceName;
     // 航向
     private Double heading;
     // 航向角

@@ -11,4 +11,10 @@ public class RedisKeyConstants {
     public final static String MOTOR_INFO = "MotorInfo";
     // 传感器信息
     public final static String SENSOR_INFO = "SensorInfo";
+    // 手自动状态信息
+    public final static String STATE_INFO = "StateInfo";
+    // 毫米波雷达信息
+    public final static String RADAR_INFO = "RadarInfo";
+    // 录制航点状态
+    public final static String RECORD_POINT_STATUS = "RecordPointStatus";
 }

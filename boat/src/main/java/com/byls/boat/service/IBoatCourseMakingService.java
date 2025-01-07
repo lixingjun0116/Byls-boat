@@ -55,5 +55,14 @@ public interface IBoatCourseMakingService extends IService<BoatCourseMaking> {
     boolean saveRoute(BoatRouteVO boatRouteVO);
 
     //船是否存在有效航线
-    boolean isExistValidRoute(String boatDeviceId);
+    boolean isExistValidRoute(String boatDeviceId,String routeName);
+
+    //当前是否正在录制航点
+    boolean isRecording(String boatDeviceId);
+
+    //设置录制航线状态
+    boolean setRecordingStatus(String boatDeviceId, Integer status);
+
+    //通过socket发送航路信息到船控
+    boolean sendRouteInfo(String routeCode);
 }
