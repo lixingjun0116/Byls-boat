@@ -1,10 +1,13 @@
 package com.byls.boat.service.catchhandler;
 
+import com.alibaba.fastjson2.JSON;
+import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.BoatDeviceTypeRelation;
 import com.byls.boat.entity.UnmannedShip;
 import com.byls.boat.service.BoatDeviceTypeRelationService;
 import com.byls.boat.service.IUnmannedShipService;
 import com.byls.boat.util.RedisUtil;
+import com.byls.boat.vo.BoatPushRodVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,8 +42,12 @@ public class CacheCenter {
     private static final ConcurrentHashMap<String, String> boatDeviceIdToDeviceTypeMapCache = new ConcurrentHashMap<>();
     // 无人船列表内存缓存
     private static final String UNMANNED_SHIP_LIST = "unmanned_ship_list";
+    // 推杆值缓存
+    private static final String PUSH_ROD_VALUE = "push_rod_value";
+    private static ConcurrentHashMap<String, BoatPushRodVO> pushRodValueCache = new ConcurrentHashMap<>();
 
     private static List<UnmannedShip> unmannedShipListCache = new ArrayList<>();
+
     //初始化缓存内存
     public void initCache() {
         // 初始化并缓存船只和船类型的关联关系
@@ -158,6 +165,7 @@ public class CacheCenter {
         }
         return unmannedShipListCache;
     }
+
     // 获取无人船设备列表缓存通过船设备id
     public UnmannedShip getUnmannedShipByDeviceId(String boatDeviceId) {
         if (unmannedShipListCache.isEmpty()) {
@@ -170,4 +178,36 @@ public class CacheCenter {
         }
         return null;
     }
+
+    //获取推杆值缓存
+    public BoatPushRodVO getPushRodValue(String boatDeviceId) {
+        BoatPushRodVO cachedValue = pushRodValueCache.get(boatDeviceId);
+        if (cachedValue != null) {
+            return cachedValue;
+        }
+
+        String pushRodValue = redisUtil.getValue(RedisKeyConstants.PUSH_ROD_VALUE + ":" + boatDeviceId);
+        if (pushRodValue != null) {
+            BoatPushRodVO boatPushRod = JSON.parseObject(pushRodValue, BoatPushRodVO.class);
+            pushRodValueCache.put(boatDeviceId, boatPushRod);
+            return boatPushRod;
+        } else {
+            BoatPushRodVO defaultPushRod = new BoatPushRodVO(boatDeviceId, 0, 0);
+            pushRodValueCache.put(boatDeviceId, defaultPushRod);
+            redisUtil.setValue(RedisKeyConstants.PUSH_ROD_VALUE + ":" + boatDeviceId, JSON.toJSONString(defaultPushRod));
+            return defaultPushRod;
+        }
+    }
+
+    //更新推杆值缓存
+    public void updatePushRodValue(BoatPushRodVO pushRodValue) {
+        try {
+            String boatDeviceId = pushRodValue.getBoatDeviceId();
+            pushRodValueCache.put(boatDeviceId, pushRodValue);
+            redisUtil.setValue(RedisKeyConstants.PUSH_ROD_VALUE + ":" + boatDeviceId, JSON.toJSONString(pushRodValue));
+        } catch (Exception e) {
+            log.error("更新推杆值缓存失败，船设备ID {}: {}", pushRodValue.getBoatDeviceId(), e.getMessage(), e);
+        }
+    }
+
 }

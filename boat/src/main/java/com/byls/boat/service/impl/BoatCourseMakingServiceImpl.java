@@ -41,8 +41,14 @@ public class BoatCourseMakingServiceImpl extends ServiceImpl<BoatCourseMakingMap
     private RedisUtil redisUtil;
     @Autowired
     private CacheCenter cacheCenter;
-    @Autowired
-    private WebSocketHelper webSocketHelper;
+
+    private final WebSocketHelper webSocketHelper;
+
+
+    public BoatCourseMakingServiceImpl(WebSocketHelper webSocketHelper) {
+        this.webSocketHelper = webSocketHelper;
+    }
+
     /**
      * 添加航线点并返回主键ID
      *

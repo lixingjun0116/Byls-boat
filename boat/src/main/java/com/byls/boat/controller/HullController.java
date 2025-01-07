@@ -3,12 +3,14 @@ package com.byls.boat.controller;
 import com.byls.boat.common.ResponseResult;
 import com.byls.boat.service.BoatHullService;
 import com.byls.boat.util.ResponseUtil;
+import com.byls.boat.vo.BoatPushRodVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
@@ -81,15 +83,12 @@ public class HullController {
 
     // 控制左右推杆
     @PostMapping("/controlLeftRight")
-    public ResponseResult<?> controlLeftRight(
-            @RequestParam("boatDeviceId") @NotBlank(message = "boatDeviceId 不能为空") String boatDeviceId,
-            @RequestParam @Pattern(regexp = "^-?\\d+(\\.\\d+)?$", message = "leftValue 必须为数字") String leftValue,
-            @RequestParam @Pattern(regexp = "^-?\\d+(\\.\\d+)?$", message = "rightValue 必须为数字") String rightValue) {
+    public ResponseResult<?> controlLeftRight(@RequestBody @Valid BoatPushRodVO boatPushRodVO) {
         try {
-            boatHullService.controlLeftRightPushRod(boatDeviceId, leftValue, rightValue);
+            boatHullService.controlLeftRightPushRod(boatPushRodVO);
             return ResponseUtil.successResponse();
         } catch (Exception e) {
-            log.error("控制船 {} 的左右推杆失败: {}", boatDeviceId, e.getMessage(), e);
+            log.error("控制船 {} 的左右推杆失败: {}", boatPushRodVO.getBoatDeviceId(), e.getMessage(), e);
             return ResponseUtil.failResponse("控制推杆失败");
         }
     }
@@ -99,9 +98,20 @@ public class HullController {
     public ResponseResult<?> getPreRunRoute(@RequestParam("boatDeviceId") String boatDeviceId) {
         return ResponseUtil.successResponse(boatHullService.getPreRunRoute(boatDeviceId));
     }
+
     // 获取船实时信息
     @GetMapping("/getBoatDynamicsInfo")
     public ResponseResult<?> getBoatDynamicsInfo(@RequestParam("boatDeviceId") String boatDeviceId) {
         return ResponseUtil.successResponse(boatHullService.showBoatDynamicsInfo(boatDeviceId));
+    }
+
+    // 获取左右推杆数值
+    @GetMapping("/getLeftRightValue")
+    public ResponseResult<?> getLeftRightValue(@RequestParam("boatDeviceId") String boatDeviceId) {
+        if (StringUtils.isBlank(boatDeviceId)) {
+            log.error("获取左右推杆数值失败: boatDeviceId 不能为空");
+            return ResponseUtil.failResponse("boatDeviceId 不能为空");
+        }
+        return ResponseUtil.successResponse(boatHullService.getLeftRightPushRodValue(boatDeviceId));
     }
 }

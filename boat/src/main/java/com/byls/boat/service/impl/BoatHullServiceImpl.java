@@ -12,7 +12,7 @@ import com.byls.boat.service.*;
 import com.byls.boat.service.catchhandler.CacheCenter;
 import com.byls.boat.util.RedisUtil;
 import com.byls.boat.vo.BoatDynamicsInfoVO;
-import com.byls.boat.vo.BoatLocationInfoVO;
+import com.byls.boat.vo.BoatPushRodVO;
 import com.byls.boat.vo.IntegratedNavigationInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,6 @@ public class BoatHullServiceImpl implements BoatHullService {
     private IRouteService routeService;
     @Autowired
     private IWaypointService waypointService;
-
 
 
     // 获取船实时状态
@@ -104,35 +103,37 @@ public class BoatHullServiceImpl implements BoatHullService {
 
     // 获取船实时坐标
     @Override
-    public BoatLocationInfoVO getCurrentLocation(String boatDeviceId) {
+    public IntegratedNavigationInfoVO getCurrentLocation(String boatDeviceId) {
         try {
             String deviceType = cacheCenter.getDeviceTypeByBoatDeviceId(boatDeviceId);
             String redisKey = deviceType + ":" + RedisKeyConstants.INTEGRATED_NAVIGATION_INFO + ":" + boatDeviceId;
             String navigationData = redisUtil.getByType(BoatType.fromType(deviceType), redisKey);
             if (navigationData == null) {
-                return new BoatLocationInfoVO();
+                return new IntegratedNavigationInfoVO();
             }
-            BoatLocationInfoVO boatLocationInfoVO = JSON.parseObject(navigationData, BoatLocationInfoVO.class);
-            boatLocationInfoVO.setBoatDeviceId(boatDeviceId);
+            IntegratedNavigationInfoVO internalInfoVO = JSON.parseObject(navigationData, IntegratedNavigationInfoVO.class);
+            internalInfoVO.setBoatDeviceId(boatDeviceId);
 
             //组织返回信息
             UnmannedShip unmannedShip = cacheCenter.getUnmannedShipByDeviceId(boatDeviceId);
             if (unmannedShip != null) {
-                boatLocationInfoVO.setBoatDeviceName(unmannedShip.getShipName());
-                boatLocationInfoVO.setBoatDeviceType(BoatType.fromType(unmannedShip.getShipType()));
+                internalInfoVO.setBoatDeviceName(unmannedShip.getShipName());
+                internalInfoVO.setBoatDeviceType(BoatType.fromType(unmannedShip.getShipType()));
             }
-            return boatLocationInfoVO;
+            return internalInfoVO;
         } catch (Exception e) {
-            return new BoatLocationInfoVO();
+            return new IntegratedNavigationInfoVO();
         }
     }
 
     // 控制左右推杆
     @Override
-    public void controlLeftRightPushRod(String boatDeviceId, String leftValue, String rightValue) {
+    public void controlLeftRightPushRod(BoatPushRodVO boatPushRodVO) {
         try {
-            String message = "{\"function\":\"C1002\",\"left_joystick\":\"" + leftValue + "\",\"right_joystick\":\"" + rightValue + "\"}";
-            webSocketService.sendMessageToBoat(boatDeviceId, message);
+            String message = "{\"function\":\"C1002\",\"left_joystick\":\"" + boatPushRodVO.getLeftValue() + "\",\"right_joystick\":\"" + boatPushRodVO.getRightValue() + "\"}";
+            webSocketService.sendMessageToBoat(boatPushRodVO.getBoatDeviceId(), message);
+            // 本地存储左右推杆值
+            cacheCenter.updatePushRodValue(boatPushRodVO);
         } catch (Exception e) {
             log.error("控制左右推杆失败: {}", e.getMessage(), e);
         }
@@ -169,6 +170,12 @@ public class BoatHullServiceImpl implements BoatHullService {
         Waypoint waypoint = new Waypoint();
         waypoint.setRouteCode(routeCode);
         return waypointService.getWaypointByCondition(waypoint);
+    }
+
+    //本地存储左右推杆值
+    @Override
+    public BoatPushRodVO getLeftRightPushRodValue(String boatDeviceId) {
+        return cacheCenter.getPushRodValue(boatDeviceId);
     }
 
     // 组织组合导航数据

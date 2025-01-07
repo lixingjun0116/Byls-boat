@@ -17,4 +17,6 @@ public class RedisKeyConstants {
     public final static String RADAR_INFO = "RadarInfo";
     // 录制航点状态
     public final static String RECORD_POINT_STATUS = "RecordPointStatus";
+    // 左右推杆值
+    public final static String PUSH_ROD_VALUE = "PushRodValue";
 }

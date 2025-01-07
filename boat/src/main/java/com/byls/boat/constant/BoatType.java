@@ -1,11 +1,11 @@
 package com.byls.boat.constant;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonSerialize(using = BoatTypeSerializer.class)
 public enum BoatType {
-    // 旅游船
     TOURIST_BOAT("tourist_boat", 0, "旅游船"),
-    // 海豚
     DOLPHIN("dolphin", 2, "海豚"),
-    // 靶船
     TARGET_BOAT("target_boat", 3, "靶船");
 
     private final String type;
@@ -39,3 +39,4 @@ public enum BoatType {
         throw new IllegalArgumentException("未知船型: " + type);
     }
 }
+   

@@ -2,19 +2,23 @@ package com.byls.boat.common;
 
 import com.byls.boat.controller.WebSocketController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 
-@Service
+@Component
 public class WebSocketHelper {
+    private final WebSocketController webSocketController;
 
     @Autowired
-    private WebSocketController webSocketController;
+    public WebSocketHelper(@Lazy WebSocketController webSocketController) {
+        this.webSocketController = webSocketController;
+    }
 
-    public void sendMessageToBoat(String boatDeviceId, String message) throws IOException {
-        String websocketUrl = webSocketController.getWebSocketUrlByBoatDeviceId(boatDeviceId);
+    public void sendMessageToBoat(String boatId, String message) throws IOException {
+        String websocketUrl = webSocketController.getWebSocketUrlByBoatDeviceId(boatId);
         if (websocketUrl != null) {
             webSocketController.sendMessageToSession(websocketUrl, message);
         } else {
@@ -22,8 +26,8 @@ public class WebSocketHelper {
         }
     }
 
-    public WebSocketSession getSessionByBoat(String boatDeviceId) {
-        String websocketUrl = webSocketController.getWebSocketUrlByBoatDeviceId(boatDeviceId);
+    public WebSocketSession getSessionByBoat(String boatId) {
+        String websocketUrl = webSocketController.getWebSocketUrlByBoatDeviceId(boatId);
         if (websocketUrl != null) {
             return webSocketController.getSessionByUri(websocketUrl);
         }
