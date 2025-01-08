@@ -4,6 +4,7 @@ import com.byls.boat.common.ResponseResult;
 import com.byls.boat.service.BoatHullService;
 import com.byls.boat.util.ResponseUtil;
 import com.byls.boat.vo.BoatPushRodVO;
+import com.byls.boat.vo.SwitchModeRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 /**
  * 控制页面、调试页面控制层
@@ -36,15 +35,13 @@ public class HullController {
 
     //模式切换 0-调试 1-航路
     @PostMapping("/switchMode")
-    public ResponseResult<?> switchMode(
-            @RequestParam("boatDeviceId") @NotBlank(message = "boatDeviceId 不能为空") String boatDeviceId,
-            @RequestParam @Pattern(regexp = "^([01])$", message = "state 必须为 0 或 1") String state) {
+    public ResponseResult<?> switchMode(@Valid @RequestBody SwitchModeRequest request) {
         try {
-            boatHullService.switchBoatControlMode(boatDeviceId, state);
-            log.info("成功切换船 {} 的模式为 {}", boatDeviceId, state);
-            return ResponseUtil.successResponse(state);
+            boatHullService.switchBoatControlMode(request.getBoatDeviceId(), request.getState());
+            log.info("成功切换船 {} 的模式为 {}", request.getBoatDeviceId(), request.getState());
+            return ResponseUtil.successResponse(request.getState());
         } catch (Exception e) {
-            log.error("切换船 {} 的模式失败: {}", boatDeviceId, e.getMessage(), e);
+            log.error("切换船 {} 的模式失败: {}", request.getBoatDeviceId(), e.getMessage(), e);
             return ResponseUtil.failResponse("切换模式失败");
         }
     }
