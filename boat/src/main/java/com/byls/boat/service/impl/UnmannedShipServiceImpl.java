@@ -11,6 +11,7 @@ import com.byls.boat.mapper.UnmannedShipMapper;
 import com.byls.boat.service.IUnmannedShipService;
 import com.byls.boat.service.catchhandler.CacheCenter;
 import com.byls.boat.util.RedisUtil;
+import com.byls.boat.vo.BoatLocationAllVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +79,8 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
 
     // 获取所有船的位置信息
     @Override
-    public Map<String, List<Double>> getAllBoatLocation() {
-        Map<String, List<Double>> result = new HashMap<>();
+    public List<BoatLocationAllVO> getAllBoatLocation() {
+        List<BoatLocationAllVO> result = new ArrayList<>();
         try {
             // 获取所有船类型
             for (BoatType boatType : BoatType.values()) {
@@ -110,11 +111,19 @@ public class UnmannedShipServiceImpl extends ServiceImpl<UnmannedShipMapper, Unm
 
                     // 组织返回数据
                     List<Double> location = Arrays.asList(integratedNavigationInfo.getLongitude(), integratedNavigationInfo.getLatitude());
-                    result.put(boatDeviceId, location);
+                    BoatLocationAllVO boatLocationAllVO = new BoatLocationAllVO();
+                    boatLocationAllVO.setBoatDeviceId(boatDeviceId);
+                    UnmannedShip unmannedShipByDeviceId = cacheCenter.getUnmannedShipByDeviceId(boatDeviceId);
+                    if (unmannedShipByDeviceId != null) {
+                        boatLocationAllVO.setBoatDeviceName(unmannedShipByDeviceId.getShipName());
+                    }
+                    boatLocationAllVO.setBoatDeviceTypeName(boatType.getBoatTypeName());
+                    boatLocationAllVO.setLocationValue(location);
+                    result.add(boatLocationAllVO);
                 }
             }
         } catch (Exception e) {
-            log.error("获取所有船的位置信息失败: " + e);
+            log.error("获取所有船的位置信息失败: {}", String.valueOf(e));
         }
         return result;
     }

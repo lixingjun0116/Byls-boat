@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.byls.boat.constant.BoatType;
 import com.byls.boat.constant.RedisKeyConstants;
 import com.byls.boat.entity.BoatNavigationRecords;
+import com.byls.boat.entity.UnmannedShip;
 import com.byls.boat.entity.hardware.IntegratedNavigationInfo;
 import com.byls.boat.service.IBoatNavigationRecordsService;
 import com.byls.boat.service.catchhandler.CacheCenter;
@@ -82,38 +83,28 @@ public class BoatNavigationRecordsTiming implements Runnable {
         }
     }
 
-    //保存导航记录的条件
+    // 保存导航记录的条件
     private void saveNavigationRecord(String boatDeviceId, IntegratedNavigationInfo integratedNavigationInfo) {
         BoatNavigationRecords record = new BoatNavigationRecords();
         record.setBoatDeviceId(boatDeviceId);
         BoatNavigationRecords navigationRecord = boatNavigationRecordsService.getNavigationRecordsByCondition(record);
+        UnmannedShip unmannedShip = cacheCenter.getUnmannedShipByDeviceId(boatDeviceId);
+        if (unmannedShip != null) {
+            record.setDeviceName(unmannedShip.getShipName());
+        }
 
         if (navigationRecord == null) {
             log.error("当前设备编号：{}，没有航点数据", boatDeviceId);
-            record.setBoatDeviceId(boatDeviceId);
-            // todo 后续再处理船名称问题
-            /*record.setDeviceName(integratedNavigationInfo.getDeviceName());*/
-            record.setHeading(integratedNavigationInfo.getHeading());
-            record.setHeadingAngle(integratedNavigationInfo.getHeadingAngle());
-            record.setHeadingAngleSpeed(integratedNavigationInfo.getHeadingAngleSpeed());
-            record.setLongitude(integratedNavigationInfo.getLongitude());
-            record.setLatitude(integratedNavigationInfo.getLatitude());
-            record.setCreatedTime(new java.util.Date());
-            if (boatNavigationRecordsService.addNavigationRecord(record)) {
-                log.info("当前设备编号：{}，第一次保存航点数据成功!", boatDeviceId);
-            }
+            initializeAndSaveRecord(record, integratedNavigationInfo);
             return;
         }
 
-
         double latitudeDelta = Math.abs(navigationRecord.getLatitude() - integratedNavigationInfo.getLatitude());
         double longitudeDelta = Math.abs(navigationRecord.getLongitude() - integratedNavigationInfo.getLongitude());
-        // 经纬度在2米的误差范围
         double distanceThreshold = 0.00002;
-        // 航向角速度在0.05m/s以内-就当做停船了
         double speedThreshold = 0.05;
 
-        // 航点数据和表中最后一条新数据经纬度在2米以内，或者航点数据速度小于0.05，不保存
+        // 航点数据和表中最后一条新数据经纬度在2米以内，或者航向角速度小于0.05，不保存
         if (latitudeDelta <= distanceThreshold && longitudeDelta <= distanceThreshold || navigationRecord.getHeadingAngleSpeed() < speedThreshold) {
             log.info("设备编号：{}，航点数据未发生变化,可能停船不需要保存!!!。当前经纬度：({}, {})，将要记录的经纬度：({}, {})，航向角速度：{}",
                     boatDeviceId,
@@ -123,18 +114,19 @@ public class BoatNavigationRecordsTiming implements Runnable {
                     navigationRecord.getLongitude(),
                     navigationRecord.getHeadingAngleSpeed());
         } else {
-            record.setBoatDeviceId(boatDeviceId);
-            // todo 后续再处理船名称问题
-            /*record.setDeviceName(integratedNavigationInfo.getDeviceName());*/
-            record.setHeading(integratedNavigationInfo.getHeading());
-            record.setHeadingAngle(integratedNavigationInfo.getHeadingAngle());
-            record.setHeadingAngleSpeed(integratedNavigationInfo.getHeadingAngleSpeed());
-            record.setLongitude(integratedNavigationInfo.getLongitude());
-            record.setLatitude(integratedNavigationInfo.getLatitude());
-            record.setCreatedTime(new java.util.Date());
-            if (boatNavigationRecordsService.addNavigationRecord(record)) {
-                log.info("设备编号：{}，定时保存航点数据成功!", boatDeviceId);
-            }
+            initializeAndSaveRecord(record, integratedNavigationInfo);
+        }
+    }
+
+    private void initializeAndSaveRecord(BoatNavigationRecords record, IntegratedNavigationInfo integratedNavigationInfo) {
+        record.setHeading(integratedNavigationInfo.getHeading());
+        record.setHeadingAngle(integratedNavigationInfo.getHeadingAngle());
+        record.setHeadingAngleSpeed(integratedNavigationInfo.getHeadingAngleSpeed());
+        record.setLongitude(integratedNavigationInfo.getLongitude());
+        record.setLatitude(integratedNavigationInfo.getLatitude());
+        record.setCreatedTime(new java.util.Date());
+        if (boatNavigationRecordsService.addNavigationRecord(record)) {
+            log.info("设备编号：{}，保存航点数据成功!", record.getBoatDeviceId());
         }
     }
 

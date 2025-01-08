@@ -168,37 +168,91 @@ public class WebSocketController extends TextWebSocketHandler {
     }
 
     // 处理录制的航路信息，保存本地
-    private void handleRouteData(String boatDeviceId, WebSocketMessageContext msg) {
+   /* private void handleRouteData(String boatDeviceId, WebSocketMessageContext msg) {
         try {
+            // 记录开始时间
+            long startTime = System.currentTimeMillis();
             List<BoatCourseMaking> navigationRecords = JSON.parseArray(msg.getJsonData(), BoatCourseMaking.class);
             if (CollectionUtils.isNotEmpty(navigationRecords)) {
-                List<BoatCourseMaking> courses = new ArrayList<>();
-                for (int i = 0; i < navigationRecords.size(); i++) {
-                    BoatCourseMaking course = new BoatCourseMaking();
-                    course.setBoatDeviceId(boatDeviceId);
-                    course.setLatitude(navigationRecords.get(i).getLatitude());
-                    course.setLongitude(navigationRecords.get(i).getLongitude());
-                    course.setOrderIndex(i + 1);
-                    course.setCreatedTime(new Date());
-                    course.setUpdatedTime(new Date());
-                    course.setDeleteStatus(false);
-                    courses.add(course);
+                int batchSize = 500;
+                int numberOfThreads = (navigationRecords.size() + batchSize - 1) / batchSize; // 计算需要的线程数
+                ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+                CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-                    if (courses.size() == 500) {
-                        courseMakingService.saveBatch(courses);
-                        courses.clear();
-                    }
+                for (int i = 0; i < navigationRecords.size(); i += batchSize) {
+                    int start = i;
+                    int end = Math.min(i + batchSize, navigationRecords.size());
+                    executorService.submit(() -> {
+                        try {
+                            List<BoatCourseMaking> courses = new ArrayList<>();
+                            for (int j = start; j < end; j++) {
+                                courses.add(getBoatCourseMaking(boatDeviceId, navigationRecords, j));
+                            }
+                            courseMakingService.saveBatch(courses);
+                        } finally {
+                            latch.countDown(); // 任务完成后减少计数
+                        }
+                    });
                 }
 
-                if (!courses.isEmpty()) {
-                    courseMakingService.saveBatch(courses);
-                }
+                latch.await(); // 等待所有线程完成
+                executorService.shutdown();
+
             }
+            // 记录结束时间
+            long endTime = System.currentTimeMillis();
+            log.info("保存航线点信息成功, 船ID: {}, 航线点数量: {}, 耗时: {}ms", boatDeviceId, navigationRecords.size(), endTime - startTime);
         } catch (JSONException e) {
             log.error("JSON 解析错误: {}", e.getMessage(), e);
         } catch (Exception e) {
             log.error("解析航线点信息失败: {}", e.getMessage(), e);
         }
+    }*/
+    // 处理录制的航路信息，保存本地
+    private void handleRouteData(String boatDeviceId, WebSocketMessageContext msg) {
+        try {
+            // 记录开始时间
+            long startTime = System.currentTimeMillis();
+            List<BoatCourseMaking> navigationRecords = JSON.parseArray(msg.getJsonData(), BoatCourseMaking.class);
+            List<BoatCourseMaking> selectedRecords = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(navigationRecords)) {
+                int maxRecords = 100;
+
+                if (navigationRecords.size() <= maxRecords) {
+                    selectedRecords = navigationRecords;
+                } else {
+                    int step = navigationRecords.size() / maxRecords;
+                    for (int i = 0; i < maxRecords; i++) {
+                        selectedRecords.add(navigationRecords.get(i * step));
+                    }
+                }
+
+                List<BoatCourseMaking> courses = new ArrayList<>();
+                for (int j = 0; j < selectedRecords.size(); j++) {
+                    courses.add(getBoatCourseMaking(boatDeviceId, selectedRecords, j));
+                }
+                courseMakingService.saveBatch(courses);
+            }
+            // 记录结束时间
+            long endTime = System.currentTimeMillis();
+            log.info("保存航线点信息成功, 船ID: {}, 航线点数量: {}, 耗时: {}ms", boatDeviceId, selectedRecords.size(), endTime - startTime);
+        } catch (JSONException e) {
+            log.error("JSON 解析错误: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("解析航线点信息失败: {}", e.getMessage(), e);
+        }
+    }
+
+    private static BoatCourseMaking getBoatCourseMaking(String boatDeviceId, List<BoatCourseMaking> subList, int j) {
+        BoatCourseMaking course = new BoatCourseMaking();
+        course.setBoatDeviceId(boatDeviceId);
+        course.setLatitude(subList.get(j).getLatitude());
+        course.setLongitude(subList.get(j).getLongitude());
+        course.setOrderIndex(j + 1);
+        course.setCreatedTime(new Date());
+        course.setUpdatedTime(new Date());
+        course.setDeleteStatus(false);
+        return course;
     }
 
     // 处理组合导航信息
