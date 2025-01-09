@@ -29,7 +29,7 @@ public class TestDataGenerator {
             file.write(jsonData);
             System.out.println("测试数据已保存到 test_data.json 文件中");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("保存测试数据失败");
         }
     }
 }

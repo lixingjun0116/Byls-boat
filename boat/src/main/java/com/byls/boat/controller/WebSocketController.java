@@ -20,6 +20,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import reactor.util.annotation.NonNull;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class WebSocketController extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, @NonNull CloseStatus status) {
         String uri = Objects.requireNonNull(session.getUri()).toString();
         sessions.remove(uri);
         log.info("WebSocket连接已关闭: {}", session);
@@ -73,7 +74,7 @@ public class WebSocketController extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
         String clientId = session.getId();
 

@@ -11,6 +11,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
+import reactor.util.annotation.NonNull;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
 
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
 
         List<UnmannedShip> boats = unmannedShipService.getUnmannedShipList();
         for (UnmannedShip boat : boats) {

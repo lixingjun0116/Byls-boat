@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * @Description 定时存储导航记录
- * @Date 2024/11/5 10:57
- * @Created by lxj
+ * &#064;Description  定时存储导航记录
+ * &#064;Date  2024/11/5 10:57
+ * &#064;Created  by lxj
  */
 @Slf4j
 @Component

@@ -5,9 +5,9 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @Description 请求入参
- * @Date 2025/1/9 09:16
- * @Created by lxj
+ * &#064;Description  请求入参
+ * &#064;Date  2025/1/9 09:16
+ * &#064;Created  by lxj
  */
 @Data
 public class BoatRequestVO {
