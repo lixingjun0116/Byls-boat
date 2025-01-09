@@ -43,7 +43,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         // 在此处设置bufferSize
         container.setMaxTextMessageBufferSize(512000);
         container.setMaxBinaryMessageBufferSize(512000);
-        container.setMaxSessionIdleTimeout(15 * 60000L);
+        /*container.setMaxSessionIdleTimeout(15 * 60000L);*/
         return container;
     }
 }
