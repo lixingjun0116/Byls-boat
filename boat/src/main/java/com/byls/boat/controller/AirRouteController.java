@@ -4,7 +4,9 @@ import com.byls.boat.common.ResponseResult;
 import com.byls.boat.entity.BoatCourseMaking;
 import com.byls.boat.service.IBoatCourseMakingService;
 import com.byls.boat.util.ResponseUtil;
+import com.byls.boat.vo.BoatRequestVO;
 import com.byls.boat.vo.BoatRouteVO;
+import com.byls.boat.vo.RouteInfoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -39,9 +41,9 @@ public class AirRouteController {
 
     // 航线采集
     @PostMapping("/collectCourseMaking")
-    public ResponseResult<?> collectCourseMaking(@RequestParam("boatDeviceId") String boatDeviceId) {
+    public ResponseResult<?> collectCourseMaking(@Validated @RequestBody BoatRequestVO  boatRequestVO) {
         try {
-            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking(boatDeviceId);
+            BoatCourseMaking boatCourseMaking = boatCourseMakingService.collectCourseMaking(boatRequestVO.getBoatDeviceId());
             if (boatCourseMaking == null) {
                 log.error("航线采集失败: 未找到航线数据");
                 return ResponseUtil.failResponse();
@@ -156,8 +158,9 @@ public class AirRouteController {
 
     // 通过socket发送航路信息到船控
     @PostMapping("/sendRouteInfo")
-    public ResponseResult<?> sendRouteInfo(@RequestParam String routeCode) {
+    public ResponseResult<?> sendRouteInfo(@RequestBody RouteInfoRequest request) {
         try {
+            String routeCode = request.getRouteCode();
             boolean sendResult = boatCourseMakingService.sendRouteInfo(routeCode);
             if (!sendResult) {
                 log.error("发送航路信息失败: 路由代码 {}", routeCode);

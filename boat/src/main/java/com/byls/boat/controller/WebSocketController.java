@@ -175,7 +175,8 @@ public class WebSocketController extends TextWebSocketHandler {
             List<BoatCourseMaking> navigationRecords = JSON.parseArray(msg.getJsonData(), BoatCourseMaking.class);
             if (CollectionUtils.isNotEmpty(navigationRecords)) {
                 int batchSize = 500;
-                int numberOfThreads = (navigationRecords.size() + batchSize - 1) / batchSize; // 计算需要的线程数
+                // 计算需要的线程数
+                int numberOfThreads = (navigationRecords.size() + batchSize - 1) / batchSize;
                 ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
                 CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
@@ -190,12 +191,13 @@ public class WebSocketController extends TextWebSocketHandler {
                             }
                             courseMakingService.saveBatch(courses);
                         } finally {
-                            latch.countDown(); // 任务完成后减少计数
+                            // 任务完成后减少计数
+                            latch.countDown();
                         }
                     });
                 }
-
-                latch.await(); // 等待所有线程完成
+                // 等待所有线程完成
+                latch.await();
                 executorService.shutdown();
 
             }
