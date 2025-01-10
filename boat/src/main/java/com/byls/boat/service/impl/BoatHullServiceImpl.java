@@ -89,13 +89,14 @@ public class BoatHullServiceImpl implements BoatHullService {
                     unmannedShipService.updateUnmannedShip(unmannedShip);
                     cacheCenter.catchUnmannedShipList();
                     log.info("切换船控模式成功");
-                    return;
+                    break;
                 }
             }
 
             //2.通知船端控制模式切换了
             String message = "{\"function\":\"C1001\",\"mode\":\"" + controlMode + "\"}";
             webSocketService.sendMessageToBoat(boatDeviceId, message);
+            log.info("{}发送控制模式切换消息成功:{}", boatDeviceId,controlMode);
         } catch (Exception e) {
             log.error("切换船控模式失败: {}", e.getMessage(), e);
         }
